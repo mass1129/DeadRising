@@ -116,108 +116,43 @@
 
               <img src="Image/RigAnim_Sprint.png" width="500px"></img>  
             
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-    * **Unity Blend Tree**
-      * 자연스러운 애니메이션 전환  
-       <img src="Image/blendTree2.png" height="300px"></img>  
-  * **스킬**  : **Animator** Attack Layer 
-    * **참고 게임 영상** : 해당 영상을 프레임 단위로 끊어서 모션 분석  
-       <img src="Image/refGif.gif"></img>  
-    * **[UMotion Pro](https://assetstore.unity.com/packages/tools/animation/umotion-pro-animation-editor-95991)** 사용하여 총 11가지 애니메이션 직접 제작  
-      <img src="Image/MakingAnim.png"  height="300px"></img>  
-    
-    * **Unity Avatar Mask**  
-      * 스킬은 기본적으로 상체 애니메이션 -> 상체 애니메이션 마스크 사용  
-      <img src="Image/ShootLayer.png" height="300px"></img>  
-
-    * **스킬 종류**  
-      * **대시** : 앞, 뒤, 좌, 우  
-
-        <img src="Image/unnamed.gif" style="width:400px"></img> <img src="Image/BackDash.gif" style="width:400px"></img> <img src="Image/leftdash.gif" style="width:400px"></img> <img src="Image/rightDash.gif" style="width:400px"></img>  
-      * **도약**  
-        <img src="Image/JumpHigh.gif" style="width:400px"></img>
-      * **일반 공격**  : 양쪽 손 번갈아 공격 **콤보 시스템 적용**  
-
-        <img src="Image/rightAttack.gif" style="width:400px"></img> <img src="Image/leftAttack.gif" style="width:400px"></img>  
-
-      * **궁극기**  
-        * 손에서 표창을 돌린뒤 5개의 표창이 플레이어 앞에 펼쳐지는 모션 구현  
-        * 좌 클릭시 한발씩, 우 클릭시 남아있는 표창 모두 발사  
-
-        <img src="Image/ultimateAttack.gif" style="width:400px"></img> <img src="Image/allAttack.gif" style="width:400px"></img>  
-         
-         
 
 ## 게임 로직 및 기능
 
-* **K_PlayerController.cs**  
-  *  **void HandleMovement()** : 걷기, 뛰기 및 해당 애니메이션 SetFloat 함수 기능 포함
-  *  **void HandleJump()** : 점프
-  *  **void CheckingGrounded()** : (bool)isGrounded 체크
-  *  **void HandleMouseLook()** : 카메라 제어 
-  
-* **K_PlayerFire.cs**  
-  *  **Main Function**  : Update()에서 사용자의 입력에 따라 일반 공격 및 공격 스킬 시전
-      *  **void Attack()** : **일반 공격** 투사체 생성 위치 및 애니메이션, 공격 사운드 제어
-      *  **UAttack()** : **궁극기** 공격 애니메이션(캐릭터), 사운드 제어
-      *  **void HandleJettUltimateFire()** : **궁극기** 쿨타임, 시전동작 중 표창 위치, 발사시 표창 슬롯 제어   
-  *  **Animation Event Function** : 공격 애니메이션과 공격 이펙트 싱크 일치, 스킬 연계, 딜레이, 콤보시스템 구현하기 위해 해당 기능 사용
-      *  **void GeneralFire()** : **일반 공격** Raycast, 각종 이펙트 생성(발사, 투사체, 타격) 몬스터에게 데미지 적용, 콤보++
-      *  **void UFire()** : **궁극기(한발씩 발사)** Raycast, 각종 이펙트 생성(발사, 투사체, 타격), 몬스터에게 데미지 적용, 콤보++
-      *  **void UAllFire()** : **궁극기(남은 표창 모두 발사)** Raycast, 각종 이펙트 생성(발사, 투사체, 타격), 몬스터에게 데미지 적용  
-      *  **void Combo() etc..** : 양손 번갈아가면서 공격 및 스킬 딜레이 제어  
-      *  **void StartBulletAnim1() etc..** : 캐릭터 궁극기 시전 애니메이션에 따라  
-          표창 돌리기 - 표창 5개 생성 및 일자로 펼치기 - 최종 발사 위치로 이동  
-          <img src="Image/AnimEvent.png" width="500px"></img>   
-  *  **Sub Function** : Main Function과 Animation Event Function에 포함된 함수
-      *  **void PlayAttackSound(int num)** : 사운드 pool[num] 재생 
-      *  **IEnumerator SpawnTrail(TrailRenderer Trail, Vector3 HitPoint, Vector3 HitNormal, RaycastHit hit, bool MadeImpact)** :  
-            void GeneralFire()에서 쏜 ray정보를 바탕으로 TrailRenderer 이동 및 타격 이펙트 생성
-      *  **IEnumerator USpawnTrail(TrailRenderer[] uTrailPool, Vector3 HitPoint, Vector3 HitNormal, RaycastHit hit, bool MadeImpact)** :  
-            void UFire()에서 쏜 ray정보를 바탕으로 TrailRenderer 이동 및 타격 이펙트 생성
-      *  **IEnumerator UAllSpawnTrail(TrailRenderer[] uTrailPool, Vector3 HitPoint, Vector3 HitNormal, RaycastHit hit, bool MadeImpact, int num)** :  
-            void UAllFire()에서 쏜 ray정보를 바탕으로 TrailRenderer 이동 및 타격 이펙트 생성, num은 남은 표창의 개수
-  
-* **K_JettController.cs**
-  * **Main Function**  : Update()에서 사용자의 입력에 따라 제트 캐릭터 고유 유틸리티 스킬 사용  
-      *  **void HandleDash()** : **대시** 스킬 제어  
-      *  **void HandleUpdraft()** : **도약** 스킬 제어  
-  * **Sub Function** : Main Function과 Animation Event Function에 포함된 함수
-      *  **void OnStartDash()** : 대시 방향 설정, 쿨타임 및 대시 스킬 시전 시간 카운터 시작.  
-      *  **void PlayDashParticle()** : 대시 방향에 따라 4가지 애니메이션 Play 및 4가지 파티클 생성.    
-      *  **void OnEndDash()** : 카운터 초기화 및 대시 상태 false.  
-      
-       
-      *  **void OnStartUpdraft()** : 도약 쿨타임 및 시전 시간 카운터 시작, 애니메이션 및 파티클 생성.  
-      *  **void Updraft()** : jumpVelocity.y 을 변경하여 **K_PlayerController.cs**에서 **void HandleJump()**로 인하여 도약 스킬 발동  
-      *  **void OnEndUpdraft()** : 카운터 초기화 및 도약 상태 false.  
-  
-* **K_PlayerStates.cs**  :  처음 게임 설계 때 캐릭터를 여러가지 만들 생각으로 공통 특성 설정(이동속도, 점프 높이, 중력)  
-* **K_JettStates**  :  **제트** 고유 특성(스킬 관련 쿨타임, 시전시간 등)  
-* **K_HeadShot.cs**  :  헤드샷 이펙트 생성  
-* **AttackSoundGenerator.cs**  :  타격 사운드 List 관리  
-* **K_PlayerHealth.cs**  :  플레이어 HP 관리  
-* **K_SelectSceneManager.cs**  :  캐릭터 선택 UI 컨트롤러  
-  *  **Button Event Function**  :  개별 UI 세트를 배열에 등록 후 버튼 클릭에 따라 반복문을 통해 활성화/비활성화      
-      *  **void SelectCharacter1()**,  **void  ClickInfo()**,  **void ClickQ()**,  **void ClickE()**,  **void ClickV()**,  **void ConfirmClick()**  
-* **K_1RScore.cs**  :  적 생성 및 점수 관리 스크립트    
-  * **int CurScore** : 점수에 따라 사운드 및 미션 UI 관리  
-  * **void GenerateEnemy()** :  각각 정해진 위치에 5마리 적 생성  
+* **PlayerController.cs**  
+  *  **Main Function**  : Update()에서 사용자의 입력에 따라 캐릭터 이동 제어
+      *  **void UpdateOnGround()** : (지면) 캐릭터 이동 제어  
+          *  Sub Function  
+              *  **bool IsSprinting()** : 총 발사, 장전, 스왑, 조준 상태 체크  
+                  ```C#
+                  return isSprinting && !isFiring && !isReloading && !isChangingWeapon && !isAiming;
+                  ```  
+              *  **void UpdateIsSprinting()** : bool IsSprinting()를 받아 애니메이션 적용  
+              *  **void Jump()** : float jumpVelocity 값 세팅 및 void SetinAir 호출  
+              *  **void SetinAir(float jumpVelocity)** : void UpdateInAir()로 전환, 점프 anim 재생.
+      *  **void UpdateInAir()** : (공중) 캐릭터 이동 제어    
+          *  Sub Function
+              *  **Vector3 CalculateAirControl()** : 방향키 입력에 따라 공중에서 움직임 벡터값 설정  
+              
+  *  **Animation Event Function** : 발걸음에 따라 발자국 소리 재생  
+      *  **void insideStep()** : 랜덤 오디오 클립 재생  
+          *  **AudioClip GetRandomClip(int a, int b)** : 랜덤 오디오 클립 반환  
+  *  **Unity Function** : 유니티에서 제공하는 함수  
+      *  **void OnAnimatorMove()** : Root Motion 관리  
+      *  **void OnControllerColliderHit(ControllerColliderHit hit)** : 오브젝트가 CharacterController와 충돌시 밀리게 하기 위해 사용   
 
-## 게임 시연 영상
-* Youtube 링크  
-  
-  [![Video Label](http://img.youtube.com/vi/2o7Fp0KeJ1o/0.jpg)](https://youtu.be/2o7Fp0KeJ1o)
-  
+
+* **CharacterAiming.cs**  
+  *  **Main Function**  : Update()에서 사용자의 입력에 따라 캐릭터 이동 제어
+      *  **void HandleAiming()** : 무기 조준 여부에 따라 UI 및 감도 제어    
+      *  **void HandleCamMode()** : 단서 찾기 모드 여부에 따라 카메라, UI, 감도 제어 및 ray 생성 및 단서에 근접시 크로스헤어 색 변화  
+      *  **void HandleSensitivity()** : 단축키를 통해 마우스 감도 조절      
+      *  **void HandleCameraRecoil()** : 조준시 무기 반동 감소  
+  *  **Sub Function** : 유니티에서 제공하는 함수  
+      *  **void SetSensitivity(float newSensitivity)** : 일반-조준-단서 찾기 모드 진입시 마우스 감도 세팅  
+
+
+
 ## 개선 사항
 * 애니메이션 이벤트 함수 의존성
   * 애니메이션 이벤트 함수 로 스킬 딜레이 및 연계를 제어하는데 의도치않게 모션이 캔슬되는경우(ex 벽으로 대시) 다음 스킬이 안나가는 버그 발생   
