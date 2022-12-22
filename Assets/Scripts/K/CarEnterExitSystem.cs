@@ -81,8 +81,7 @@ public class CarEnterExitSystem : MonoBehaviour
 
     IEnumerator StartDrive()
     {
-        activeWeapon.ToggleActiveWeapon();
-        yield return new WaitForSeconds(0.5f);
+        yield return StartCoroutine(activeWeapon.ToggleActiveWeapon());
         audioListener.SetActive(true);
         carCam.enabled = true;
 

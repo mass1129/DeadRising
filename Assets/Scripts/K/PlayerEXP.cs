@@ -57,7 +57,7 @@ public class PlayerEXP : MonoBehaviour
         set
         {
             _killPerLevel = value;
-            if(_killPerLevel>=(Level*5))
+            if(_killPerLevel>=(Level*2))
             {
                 Level++;
                 _killPerLevel = 0;

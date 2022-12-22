@@ -54,10 +54,6 @@ public class RayCastWeapon1 : MonoBehaviour
     [SerializeField] AudioClip reloadAudioClip;
     private AudioSource audioSource;
 
-
-
-
-
     Ray ray;
     RaycastHit hitinfo;
     float accumulatedTime;
@@ -66,51 +62,6 @@ public class RayCastWeapon1 : MonoBehaviour
     {
         recoil =GetComponent<WeaponRecoil>();
         audioSource = GetComponent<AudioSource>();
-    }
-    Vector3 GetPosition(Bullet bullet)
-    {
-
-        //�Ѿ� �߷�
-        Vector3 gravity = Vector3.down * bulletDrop;
-        //�Ѿ��� ó�� ��ġ���� time��ŭ �̵��� �Ÿ��� ���ϰ� �װ��� ��ȯ�Ѵ�.
-        return (bullet.initialPosition) + (bullet.initialVelocity * bullet.time) + (0.5f * gravity * bullet.time * bullet.time);
-    }
-
-    //�Ѿ� ����
-    Bullet CreateBullet(Vector3 position, Vector3 velocity)
-    {
-        //�Ҹ��� �����Ѵ�.
-        Bullet bullet = new Bullet();
-        //�߻���ġ ����
-        bullet.initialPosition = position;
-        //�߻�� �ʹ� �Ŀ�
-        bullet.initialVelocity = velocity;
-        //�ð� 0�ʷ� ����
-        bullet.time = 0.0f;
-        //�Ѿ˿� ���� ����, �߻���ġ�� ����, wwwwwww
-        bullet.tracer = Instantiate(tracerEffect1, position, Quaternion.identity);
-        bullet.tracerSmoke = Instantiate(tracerSmoke,raycastOrigin.transform.position, Quaternion.identity);
-        bullet.tracerSmoke.transform.forward = velocity;
-        if(bullet.tracerSmoke != null)
-        Destroy(bullet.tracerSmoke.gameObject, 2f);
-
-        //ó����ġ���� �̵��� ��Ŵ
-        bullet.tracer.AddPosition(position);
-
-        //���� �Ӽ��� ���� �Ѿ��� ��ȯ��.
-        return bullet;
-    }
-
-   
-    public void StartFiring()
-    {
-        //�߻���
-        isFiring = true;
-        if(accumulatedTime > 0.0f)
-        accumulatedTime = 0.0f;
-
-        recoil.Reset();
-        
     }
 
     public void UpdateWeapon(float deltaTime, Vector3 target)
@@ -142,11 +93,66 @@ public class RayCastWeapon1 : MonoBehaviour
         
         
     }
+
+    private void FireBullet(Vector3 target)
+    {
+        if (ammoCount <= 0) return;
+
+        ammoCount--;
+        if (!isMusinGun) magazine.SetActive(false);
+        //�ѱ� ����Ʈ ����.
+        foreach (var particle in muzzleFlash)
+        {
+            particle.Emit(1);
+
+        }
+
+        //�߻��Ŀ� ����.
+        Vector3 velocity = (target - raycastOrigin.position).normalized * bulletSpeed;
+
+        //�Ҹ��� ����(�߻���ġ, �߻��Ŀ� ����.)
+        var bullet = CreateBullet(raycastOrigin.position, velocity);
+        //�Ҹ� ����Ʈ�� �Ҹ� �߰�.
+        bullets.Add(bullet);
+        PlayFireSFX();
+        recoil.GenerateRecoil(weaponName);
+    }
+    Bullet CreateBullet(Vector3 position, Vector3 velocity)
+    {
+        //�Ҹ��� �����Ѵ�.
+        Bullet bullet = new Bullet();
+        //�߻���ġ ����
+        bullet.initialPosition = position;
+        //�߻�� �ʹ� �Ŀ�
+        bullet.initialVelocity = velocity;
+        //�ð� 0�ʷ� ����
+        bullet.time = 0.0f;
+        //�Ѿ˿� ���� ����, �߻���ġ�� ����, wwwwwww
+        bullet.tracer = Instantiate(tracerEffect1, position, Quaternion.identity);
+        bullet.tracerSmoke = Instantiate(tracerSmoke, raycastOrigin.transform.position, Quaternion.identity);
+        bullet.tracerSmoke.transform.forward = velocity;
+        if (bullet.tracerSmoke != null)
+            Destroy(bullet.tracerSmoke.gameObject, 2f);
+
+        //ó����ġ���� �̵��� ��Ŵ
+        bullet.tracer.AddPosition(position);
+
+        //���� �Ӽ��� ���� �Ѿ��� ��ȯ��.
+        return bullet;
+    }
+
+
+
     //update�� �ش� �޼ҵ� ���� -> �Ѿ��� ��� ������Ʈ ���ٰ���.
     public void UpdateBullets(float deltaTime)
     {
         SimulateBullet(deltaTime);
         DestroyBullets();
+    }
+    void DestroyBullets()
+    {
+        //�Ҹ�����(�Ҹ�time�� maxtime�� �Ѿ��)
+        bullets.RemoveAll(bullet => bullet.time >= maxLifeTime);
     }
 
     void SimulateBullet(float deltaTime)
@@ -163,12 +169,15 @@ public class RayCastWeapon1 : MonoBehaviour
             RaycastSegment(p0, p1, bullet);
         });
     }
-
-    void DestroyBullets()
+    Vector3 GetPosition(Bullet bullet)
     {
-        //�Ҹ�����(�Ҹ�time�� maxtime�� �Ѿ��)
-        bullets.RemoveAll(bullet => bullet.time >= maxLifeTime);
+
+        //�Ѿ� �߷�
+        Vector3 gravity = Vector3.down * bulletDrop;
+        //�Ѿ��� ó�� ��ġ���� time��ŭ �̵��� �Ÿ��� ���ϰ� �װ��� ��ȯ�Ѵ�.
+        return (bullet.initialPosition) + (bullet.initialVelocity * bullet.time) + (0.5f * gravity * bullet.time * bullet.time);
     }
+    
     
     void RaycastSegment(Vector3 start, Vector3 end, Bullet bullet)
     {
@@ -226,32 +235,16 @@ public class RayCastWeapon1 : MonoBehaviour
 
        
     }
-   
 
-    
+    public void StartFiring()
+    {
+        //�߻���
+        isFiring = true;
+        if (accumulatedTime > 0.0f)
+            accumulatedTime = 0.0f;
 
-    private void FireBullet(Vector3 target)
-    {   
-        if(ammoCount <=0) return;
+        recoil.Reset();
 
-        ammoCount--;
-        if(!isMusinGun) magazine.SetActive(false);
-        //�ѱ� ����Ʈ ����.
-        foreach (var particle in muzzleFlash)
-        {
-            particle.Emit(1);
-            
-        }
-        
-        //�߻��Ŀ� ����.
-        Vector3 velocity = (target - raycastOrigin.position).normalized * bulletSpeed;
-       
-        //�Ҹ��� ����(�߻���ġ, �߻��Ŀ� ����.)
-        var bullet = CreateBullet(raycastOrigin.position, velocity);
-        //�Ҹ� ����Ʈ�� �Ҹ� �߰�.
-        bullets.Add(bullet);
-        PlayFireSFX();
-        recoil.GenerateRecoil(weaponName);
     }
 
 
@@ -259,6 +252,7 @@ public class RayCastWeapon1 : MonoBehaviour
     {
         isFiring=false;
     }
+
 
     private void PlayFireSFX()
     {
@@ -284,10 +278,6 @@ public class RayCastWeapon1 : MonoBehaviour
         return ammoCount <= 0 && clipCount > 0;
     }
 
-    public bool IsLowAmmo()
-    {
-        return ammoCount == 0 && clipCount <= 0;
-    }
     public void RefillAmmo()
     {
         ammoCount = clipSize;

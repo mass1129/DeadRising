@@ -4,15 +4,74 @@ using UnityEngine;
 
 public class ReloadWeapon : MonoBehaviour
 {
-    // Start is called before the first frame update
+
+    ActiveWeapon activeWeapon;
+    public WeaponAnimationEvents animationEvents;
+    public Transform leftHand;
+    GameObject magazineHand;
+
     void Start()
     {
-        
+        activeWeapon = GetComponent<ActiveWeapon>();
+        animationEvents.WeaponAnimationEvent.AddListener(OnAnimationEvent);
     }
 
-    // Update is called once per frame
-    void Update()
+    void OnAnimationEvent(string eventName)
     {
-        
+        switch (eventName)
+        {
+            case "detach_magazine":
+                DetachMagazine();
+                break;
+            case "drop_magazine":
+                DropMagazine();
+                break;
+            case "refill_magazine":
+                RefillMagazine();
+                break;
+            case "attach_magazine":
+                AttachMagazine();
+                break;
+        }
+
+    }
+
+    private void DetachMagazine()
+    {
+        RayCastWeapon1 weapon = activeWeapon.GetActiveWeapon();
+        if (weapon.isMusinGun)
+            magazineHand = Instantiate(weapon.magazine, leftHand, true);
+        else magazineHand = Instantiate(weapon.magazine, leftHand, true);
+        weapon.magazine.SetActive(false);
+        weapon.ReloadSFX();
+    }
+
+    private void DropMagazine()
+    {
+        GameObject droppedMagazine = Instantiate(magazineHand, magazineHand.transform.position, magazineHand.transform.rotation);
+        droppedMagazine.AddComponent<Rigidbody>();
+        droppedMagazine.AddComponent<BoxCollider>();
+        magazineHand.SetActive(false);
+
+
+    }
+    private void RefillMagazine()
+    {
+        magazineHand.SetActive(true);
+    }
+
+
+    private void AttachMagazine()
+    {
+        RayCastWeapon1 weapon = activeWeapon.GetActiveWeapon();
+        weapon.magazine.SetActive(true);
+        Destroy(magazineHand);
+        weapon.RefillAmmo();
+        activeWeapon.rigController.ResetTrigger("reload_weapon");
+        if (activeWeapon.ammoWidget)
+        {
+            activeWeapon.ammoWidget.Refresh(weapon.ammoCount, weapon.clipCount, activeWeapon.activeWeaponIndex, weapon.uninfinitybullet);
+        }
+        activeWeapon.isReloading = false;
     }
 }

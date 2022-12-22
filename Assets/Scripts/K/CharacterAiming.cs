@@ -32,6 +32,12 @@ public class CharacterAiming : MonoBehaviour
 
     [SerializeField] private CinemachineVirtualCamera firstPersonCamera;
 
+
+    bool isCamModing;
+    [SerializeField] private LayerMask camColliderLayerMask = new LayerMask();
+    public Image camCrosshair;
+
+
     void Start()
     {
         sensitivity = normalSensitivity;
@@ -51,15 +57,9 @@ public class CharacterAiming : MonoBehaviour
         HandleAiming();
         HandleCamMode();
         HandleSensitivity();
-        var weapon = activeWeapon.GetActiveWeapon();
-        if(weapon)
-        {
-            weapon.recoil.recoilModifier = isAiming ? 0.3f : 1.0f;
-        }
+        HandleCameraRecoil();
     }
 
-
-    // Update is called once per frame
     void FixedUpdate()
     {
         xAxis.Update(Time.fixedDeltaTime);
@@ -72,7 +72,7 @@ public class CharacterAiming : MonoBehaviour
         transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, yawCamera, 0), turnSpeed * Time.fixedDeltaTime);
     }
 
-
+   
     void HandleAiming()
     {
         isAiming = Input.GetMouseButton(1);
@@ -92,10 +92,6 @@ public class CharacterAiming : MonoBehaviour
         }
     }
 
-
-    bool isCamModing;
-    [SerializeField] private LayerMask camColliderLayerMask = new LayerMask();
-    public Image camCrosshair;
 
 
     void HandleCamMode()
@@ -192,6 +188,17 @@ public class CharacterAiming : MonoBehaviour
             aimSensitivity += 10f;
         }
     }
+    void HandleCameraRecoil()
+    {
+        var weapon = activeWeapon.GetActiveWeapon();
+        if (weapon)
+        {
+            weapon.recoil.recoilModifier = isAiming ? 0.3f : 1.0f;
+        }
+    }
+
+
+
 
     public void SetSensitivity(float newSensitivity)
     {
