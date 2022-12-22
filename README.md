@@ -142,16 +142,37 @@
       *  **void OnControllerColliderHit(ControllerColliderHit hit)** : 오브젝트가 CharacterController와 충돌시 밀리게 하기 위해 사용   
 
 
-* **CharacterAiming.cs**  
-  *  **Main Function**  : Update()에서 사용자의 입력에 따라 캐릭터 이동 제어
-      *  **void HandleAiming()** : 무기 조준 여부에 따라 UI 및 감도 제어    
-      *  **void HandleCamMode()** : 단서 찾기 모드 여부에 따라 카메라, UI, 감도 제어 및 ray 생성 및 단서에 근접시 크로스헤어 색 변화  
-      *  **void HandleSensitivity()** : 단축키를 통해 마우스 감도 조절      
-      *  **void HandleCameraRecoil()** : 조준시 무기 반동 감소  
-  *  **Sub Function** : 유니티에서 제공하는 함수  
-      *  **void SetSensitivity(float newSensitivity)** : 일반-조준-단서 찾기 모드 진입시 마우스 감도 세팅  
+* **ActiveWeapon.cs**  
+  *  **Main Function**  : Update()에서 사용자의 입력 및 캐릭터 속성(레벨 등)에 따라 무기를 관리하는 함수  
+      *  **void HandleFireWeapon()** : 무기 발사와 장전 제어      
+      *  **void HandleSwapWeapon()** : 무기 스왑 제어    
+      *  **void UpgradeWeaponSystem()** : 레벨에 따른 무기 업그레이드 관리        
 
+  *  **Sub Function**  
+      *  **RayCastWeapon1 GetActiveWeapon() / GetWeaPon(int index)** : 무기 객체를 가져오는 함수     
+      *  **void Equip(RayCastWeapon1 newWeapon, bool equipNow=true)** : 무기를 얻는 함수, 얻자마자 장착할 여부 선택 가능       
+      *  **void SetActiveWeapon(WeaponSlot weaponSlot)** : SwitchWeapon 전달인수 세팅 및 코루틴 실행
+          *  **IEnumerator SwitchWeapon(int holsterIndex, int activateIndex)**  
+              : rig 애니메이션 파라미터 세팅 및 HolsterWeapon,ActivateWeapon코루틴 순차적 실행, activeWeaponIndex 세팅  
+              * **IEnumerator HolsterWeapon(int index)** : 무기 배낭에 보관 기능, 애니메이션 및 변경 중 bool 값 세팅  
+              * **IEnumerator ActivateWeapon(int index)** : 무기 장착 기능, 애니메이션 및 변경 중 bool 값 세팅, 무기 활성화 UI 표현       
+      *  **void RefillAmmo(int clipCount),(RayCastWeapon1 weapon ,int clipCount)** : 무기 탄창 추가 및 UI 업데이트  
+      *  **IEnumerator ToggleActiveWeapon()** : 맨손 상태로 전환하는 함수  
+      *  **void EquipFirstWeapon()** : 처음 플레이어가 생성됐을때 기본무기를 장착하는 함수  
+      *  **bool IsFiring()** : 현재 무기 발사중인지 체크하는 함수  
 
+* **ReloadWeapon.cs**  
+  *  **Animation Event Function**  : 애니메이터와 스크립트가 동일객체에 있어야 애니메이션 이벤트 함수로 등록할수있는데 플레이어는 2개의 애니메이터를 가지고 있다.
+      **ReloadWeapon.cs**스크립트는 플레이어에 있어야하지만(관리적인 측면) 여기의 함수는 rig 애니메이터의 이벤트함수로 등록해야한다. 그래서 rig오브젝트에는 **WeaponAnimationEvents.cs**를 붙여준뒤 UnityEvent 기능을 활용하여 AddListener(OnAnimationEvent)로 **ReloadWeapon.cs**에 있는 함수들을 이벤트함수로 등록할 수 있게 해주었다.    <img src="Image/eventFunction.png" width="500px"></img>
+      *  **void OnAnimationEvent(string eventName)** : 매개변수에 따라 스위치문을 통해 이벤트 함수 실행.  
+          *  **void DetachMagazine()** : 탄창 분리 기능(원래 무기에 붙어있는 탄창을 비활성화 후 임시 탄창을 손 위치에 생성한다), 장전 소리 재생.    
+          *  **void DropMagazine()** : 탄창 버리는 기능(손에 있는 탄창을 비활성화 후 떨어지는 탄창을 생성 후 떨어지게 한다(rigidbody 및 collider 추가))        
+          *  **void RefillMagazine()** : 배낭에서 탄창을 꺼내는 기능(손에 있는 탄창을 활성화 한다.)   
+          *  **void AttachMagazine()** : 총기에 탄창을 붙이는 기능(손에 있는 탄창을 비활성화하고 원래 무기에 붙어있는 탄창을 활성화한다. 애니메이션 파라미터 초기화 후 UI를 업데이트 해준다.)
+
+* **RayCastWeapon1.cs**  
+  * **Main Function**  : **ActiveWeapon.cs**의 Update()에서 호출하는 함수  
+    * **void UpdateWeapon(float deltaTime, Vector3 target)** : 
 
 ## 개선 사항
 * 애니메이션 이벤트 함수 의존성
