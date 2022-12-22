@@ -172,51 +172,20 @@
 
 * **RayCastWeapon1.cs**  
   * **Main Function**  : **ActiveWeapon.cs**의 Update()에서 호출하는 함수  
-    * **void UpdateWeapon(float deltaTime, Vector3 target)** : 
+    * **void UpdateWeapon(float deltaTime, Vector3 target)** : 발사 기준 시간 업데이트  
+      * **void UpdateFiring(float deltaTime, Vector3 target)** : 발사 기준시간과 연사율 비교하여 총알 발사  
+      * **void FireBullet(Vector3 target)** : 총알 생성, 총구 이펙트 및 사운드, 총알 개수 감소 적용
+      * **Bullet CreateBullet(Vector3 position, Vector3 velocity)** : 총알 발사 위치, 속도, 시간, traileffect 세팅된 총알 반환.  
+    * **void UpdateBullets(float deltaTime)** : 총알 업데이트    
+      * **void SimulateBullet(float deltaTime)** : 총알마다 시간 속성 업데이트  
+      * **Vector3 GetPosition(Bullet bullet)** : 시간에 따른 총알 위치 업데이트  
+      * **void RaycastSegment(Vector3 start, Vector3 end, Bullet bullet)** : 업데이트된 위치를 기반으로 레이 발사, 타격 이펙트, 좀비에게 데미지 가하는 기능.  
+  * **Sub Function**  
+    * **void StartFiring()** : (bool)isFiring = true, 발사 기준 시간 초기화, 반동 초기화  
+    * **void StopFiring()** : (bool)isFiring = false  
 
 ## 개선 사항
-* 애니메이션 이벤트 함수 의존성
-  * 애니메이션 이벤트 함수 로 스킬 딜레이 및 연계를 제어하는데 의도치않게 모션이 캔슬되는경우(ex 벽으로 대시) 다음 스킬이 안나가는 버그 발생   
-    * 시전 시간이 끝나면 관련 변수 초기화로 임시 해결  
-* Enemy가 상속성이 없어서 상호작용에 있어서 복잡한 코드 작성  
-  *  K_PlayerFire.cs  
-      ```
-      if (hit.collider.tag == "Enemy")
-      {
-          N_Enemy enemy = hit.transform.GetComponent<N_Enemy>();
-          if (enemy != null)
-              {
-                  enemy.AddDamage(damage);
 
-              }
-          K_Enemy kenemy = hit.transform.GetComponent<K_Enemy>();
-          if (kenemy != null)
-          {
-              kenemy.AddDamage(damage);
-
-          }
-
-          N_MiniBoss1 miniBoss1 = hit.transform.GetComponent<N_MiniBoss1>();
-          if (miniBoss1 != null)
-              {
-                  miniBoss1.AddDamage(damage);
-              }
-
-          N_MiniBoss2 miniBoss2 = hit.transform.GetComponent<N_MiniBoss2>();
-          if (miniBoss2 != null)
-          {
-              miniBoss2.AddDamage(damage);
-          }
-          N_Boss boss = hit.transform.GetComponent<N_Boss>();
-          if (boss != null)
-              {
-                  boss.AddDamage(damage);
-              }
-
-
-      }
-      ```  
-      * 체력과 데미지를 가하는 함수는 모든 Enemy의 공통된 기능이기 때문에 상속성을 사용하면 보다 간결한 코드가 될 것으로 보임. 
 
 ## License
 
