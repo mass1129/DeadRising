@@ -118,8 +118,8 @@
             
 
 ## 게임 로직 및 기능
-
-* **PlayerController.cs**  
+**플레이어 스크립트**  
+* **PlayerController.cs**  : 캐릭터 이동  
   *  **Main Function**  : Update()에서 사용자의 입력에 따라 캐릭터 이동 제어
       *  **void UpdateOnGround()** : (지면) 캐릭터 이동 제어  
           *  Sub Function  
@@ -141,6 +141,29 @@
       *  **void OnAnimatorMove()** : Root Motion 관리  
       *  **void OnControllerColliderHit(ControllerColliderHit hit)** : 오브젝트가 CharacterController와 충돌시 밀리게 하기 위해 사용   
 
+
+* **CharacterAiming.cs** : 카메라 제어  
+  *  **Main Function**  : Update()에서 사용자의 입력에 따라 카메라 제어
+      *  **void HandleAiming()** : 무기 조준 여부에 따라 UI 및 감도 제어    
+      *  **void HandleCamMode()** : 단서 찾기 모드 여부에 따라 카메라, UI, 감도 제어 및 ray 생성 및 단서에 근접시 크로스헤어 색 변화  
+      *  **void HandleSensitivity()** : 단축키를 통해 마우스 감도 조절      
+      *  **void HandleCameraRecoil()** : 조준시 무기 반동 감소  
+  *  **Sub Function** : 유니티에서 제공하는 함수  
+      *  **void SetSensitivity(float newSensitivity)** : 일반-조준-단서 찾기 모드 진입시 마우스 감도 세팅  
+
+* **AimLookAt.cs** : Multi-Aim Constraint의 Source Objects의 위치를 업데이트하기위한 클래스  
+  *  개요 : 캐릭터의 머리, 몸, 총구, 손 등이 해당 컴포넌트가 붙어있는 오브젝트 방향을 바라본다. 
+      ```
+      transform.position = mainCamera.transform.position+ mainCamera.transform.forward*10;
+      ```
+      
+* **CrossHairTarget.cs** : 총알의 목표지점을 쉽게 GET하기 위한 클래스  
+  *  개요 : 총을 쏠때마다 총알마다 총알의 방향(총구 -> RaycastHit.point)를 설정해야하는데 간단하게 RaycastHit.point을 가져오기 위한 클래스  
+      ```
+      //target은 CrossHariTarget.cs가 붙어있는 오브젝트의 위치  
+      Vector3 velocity = (target - raycastOrigin.position).normalized * bulletSpeed;
+      ```
+      
 * **Health.cs** : 플레이어와 좀비의 체력을 관리하는 기반 클래스  
   * **개요** : 플레이어와 좀비가 체력관련 공통 속성과 메소드가 있기때문에 확장성을 고려하여 기반클래스-파생클래스 개념 적용  
   *  **Main Function**  
@@ -151,7 +174,29 @@
       *  **void OnUpdate()** : (좀비 한정) 좀비가 데미지를 입을때 SkinnedMeshRenderer가 변하는데 시간에 따른 색조정이 필요하여 void Update()에 구현  
       *  **void OnDamage(float amount, Vector3 direction)** : 데미지를 입었을때 체력이 감소하는것과 데미지를 입어 체력이 0이하가 되었을때 사망하는것은 공통으로 구현, 플레이어 체력바 업데이트 및 좀비 타격 이펙트는 따로 구현  
       *  **void OnDeath(Vector3 direction)** : 플레이어와 좀비는 사망 메커니즘이 다르기 때문에 파생클래스에서 구현  
-* **ActiveWeapon.cs**  
+
+
+* **PlayerHealth.cs** : 플레이어 체력 파생 클래스  
+  *  **override Function**  
+      *  **void OnStart()** : 체력바 세팅  
+      *  **void OnUpdate()** : -  
+      *  **void OnDamage(float amount, Vector3 direction)** : 체력바 업데이트  
+      *  **void OnDeath(Vector3 direction)** : -  
+
+* **PlayerUI.cs** : 플레이어 체력 UI 및 무기 UI 제어  
+  *  **Function**  
+      *  **void Refresh(int ammoCount, int clipCount, int activeWeaponIndex, bool uninfinitybullet)** : 총알 및 탄창 UI 업데이트  
+      *  **void ActiveSlotUI(int index), void DeactiveSlotUI()** : 무기 장착시 무기 UI 아웃라인 표시 메소드   
+      *  **void SetHealthBarPercentage(float percentage)** : 체력바 UI 업데이트  
+
+* **PlayerEXP.cs** : 플레이어 경험치 및 경험치 UI 제어  
+  *  **property**  
+      *  **int KillNum** : 좀비 처치시 증가  
+      *  **int KillPerLevel** : 경험치바를 위해 만든 property, 레벨업시 0으로 초기화, KillPerLevel / 레벨업 필요 경험치량을 계산하여 경험치바 증가  
+          *  **void SetEXPBarPercentage(float percentage)** : 경험치바 UI 관리  
+      *  **int Level** : 플레이어 레벨  
+      
+* **ActiveWeapon.cs**  : 무기 컨트롤러  
   *  **Main Function**  : Update()에서 사용자의 입력 및 캐릭터 속성(레벨 등)에 따라 무기를 관리하는 함수  
       *  **void HandleFireWeapon()** : 무기 발사와 장전 제어      
       *  **void HandleSwapWeapon()** : 무기 스왑 제어    
@@ -170,7 +215,7 @@
       *  **void EquipFirstWeapon()** : 처음 플레이어가 생성됐을때 기본무기를 장착하는 함수  
       *  **bool IsFiring()** : 현재 무기 발사중인지 체크하는 함수  
 
-* **ReloadWeapon.cs**  
+* **ReloadWeapon.cs**  : 무기 반동 제어  
   *  **Animation Event Function**  : 애니메이터와 스크립트가 동일객체에 있어야 애니메이션 이벤트 함수로 등록할수있는데 플레이어는 2개의 애니메이터를 가지고 있다.
       **ReloadWeapon.cs**스크립트는 플레이어에 있어야하지만(관리적인 측면) 여기의 함수는 rig 애니메이터의 이벤트함수로 등록해야한다. 그래서 rig오브젝트에는 **WeaponAnimationEvents.cs**를 붙여준뒤 UnityEvent 기능을 활용하여 AddListener(OnAnimationEvent)로 **ReloadWeapon.cs**에 있는 함수들을 이벤트함수로 등록할 수 있게 해주었다.    <img src="Image/eventFunction.png" width="500px"></img>
       *  **void OnAnimationEvent(string eventName)** : 매개변수에 따라 스위치문을 통해 이벤트 함수 실행.  
@@ -206,7 +251,38 @@
 
 * **Inspector**  
   <img src="Image/GunInspector2.png" height="500px"></img>  
-## 개선 사항
+  
+**기타 스크립트**  
+* **CustomBullet.cs** : 폭탄 석궁의 딜레이 폭발 탄환 구현 스크립트     
+  *  **Function**  
+      *  **void TimeCaculation()** : lifeTime 계산 및 타격 오브젝트에 붙어서 이동하게 하는 메소드  
+      *  **void Explode()** : Physics.OverlapSphere를 통해 폭발 범위내 좀비 GET 후 폭발 피해 및 이펙트, 사운드 생성  
+      *  **void OnTriggerEnter(Collider other)** : 폭발탄환이 붙을 오브젝트 등록  
+      *  **void OnDrawGizmosSelected()** : unity editor에서 폭발 범위를 조정하기 위해 사용  
+
+* **CarEnterExitSystem.cs** : 폭탄 석궁의 딜레이 폭발 탄환 구현 스크립트     
+  *  **Function**  
+      *  **IEnumerator StartDrive()** : 자동차 탑승 메소드  
+      *  **void ExitCar()** : 자동차 하차 메소드  
+      *  **void CarSFX(AudioClip clip)** : 자동차 사운드 관리 메소드  
+          *  **void CarDrivingSFX(AudioClip clip)** : 엔진음  
+          *  **void CarFiringSFX()** : 차량 화염방사기 사운드  
+      *  **void OnTriggerEnter(Collider other), void OnTriggerExit(Collider other)** : 차량 탑승 가능 여부 판별  
+
+* **ItemPickup.cs** : 충돌시 아이템 획득 스크립트   
+
+* **KeyItem.cs** : 미션 아이템 감지 범위 제어 스크립트  
+
+* **SoundManager.cs** : 배경음 관리 스크립트  
+  *  **Function**  
+      *  **void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)** : 해당 메소드를 SceneManager.sceneLoaded의 Unity Action에 등록, 씬 전환시 자동으로 호출  
+          *  **void BGSoundPlay(AudioClip clip)** : 배경음 세팅 메소드  
+
+
+## 개선 사항  
+* 1차 프로젝트(RETAKE)에서 체력관련 클래스에 상속 클래스를 사용하지 않아서 발생한 문제를 이번 프로젝트에서는 개선  
+* 차량 탑승 전후로 rig 애니메이션이 변형이 발생 -> 차량 탑승시 Player.transform.SetParent(Car);으로 플레이어의 부모객체를 차량으로 만들고 비활성화하는데 이때 애니메이션이 초기화가 안되어서 애니메이션에 변형이 일어나는것으로 보임  
+* 일반석궁 장전중에 폭발 석궁으로 업그레이드가 발생시(아이템 획득 or 레벨업) 폭발 석궁 총알이 감소 -> 
 
 
 ## License
