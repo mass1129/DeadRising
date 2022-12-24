@@ -20,16 +20,10 @@ public class CrossHairTarget : MonoBehaviour
     {
         Ray ray = mainCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
 
-
-
         if (Physics.Raycast(ray, out RaycastHit hitInfo,float.MaxValue, Mask))
         {
-
-            
-
             transform.position = hitInfo.point;
             //Debug.Log(hitInfo.transform.tag);
-            
         }
         else
         {
@@ -49,8 +43,6 @@ public class CrossHairTarget : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hitInfo, Mask))
         {
-            
-            
 
             transform.position = hitInfo.point;
             //Debug.Log(hitInfo.transform.tag);

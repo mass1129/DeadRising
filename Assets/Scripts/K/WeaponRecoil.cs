@@ -27,7 +27,6 @@ public class WeaponRecoil : MonoBehaviour
     public void Reset()
     {
         index = 0;
-
     }
 
     int NextIndex(int index)
@@ -50,6 +49,11 @@ public class WeaponRecoil : MonoBehaviour
     }
 
     void Update()
+    {
+        HandleWeaponRecoil();
+    }
+
+    void HandleWeaponRecoil()
     {
         if (time > 0)
         {

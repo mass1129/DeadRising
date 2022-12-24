@@ -8,6 +8,7 @@ public class PlayerHealth : Health
     UIHealthBar healthBar;
     protected override void OnStart()
     {
+        base.OnStart();
         healthBar = GetComponentInChildren<UIHealthBar>();
         ragdoll = GetComponent<JH_Ragdoll>();
         healthBar.SetHealthBarPercentage(currentHealth / maxHealth);
@@ -17,11 +18,12 @@ public class PlayerHealth : Health
     {
         ragdoll.ActivateRagdoll();
     }
-    protected override void OnDamage(Vector3 direction)
-    {
+    protected override void OnDamage(float amount, Vector3 direction)
+    {   
+        base.OnDamage(amount, direction);
         healthBar.SetHealthBarPercentage(currentHealth / maxHealth);
     }
-    protected override void OnUpdate(float intensity)
+    protected override void OnUpdate()
     {
        
     }

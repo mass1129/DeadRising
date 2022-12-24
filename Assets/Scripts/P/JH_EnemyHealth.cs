@@ -14,6 +14,7 @@ public class JH_EnemyHealth : Health
 
     protected override void OnStart()
     {
+        base.OnStart();
         agent = GetComponent<JH_AiAgent>();
         skinnedMeshRendererHead = headBlink.GetComponent<SkinnedMeshRenderer>();
         JH_isHeadHit headHit = head.GetComponent<JH_isHeadHit>();
@@ -28,12 +29,19 @@ public class JH_EnemyHealth : Health
         deathState.direction = direction;
         agent.stateMachine.ChangeState(AiStateId.Death);
     }
-    protected override void OnDamage(Vector3 direction)
-    {
-
+    protected override void OnDamage(float amount, Vector3 direction)
+    {   
+        base.OnDamage(amount, direction);
+        blinkTimer = blinkDuration;
     }
-    protected override void OnUpdate(float intensity)
+    protected override void OnUpdate()
     {
+        blinkTimer -= Time.deltaTime;
+        float lerp = Mathf.Clamp01(blinkTimer / blinkDuration);
+        float intensity = (lerp * blinkIntensity);
+
+        skinnedMeshRenderer.material.SetColor("_EmissiveColor", (Color.white * intensity));
+
         if (skinnedMeshRendererHead)
         {
             skinnedMeshRendererHead.material.SetColor("_EmissiveColor", (Color.white * intensity));
