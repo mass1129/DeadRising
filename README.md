@@ -1,4 +1,4 @@
-# DeadRising
+# Rising
 메타버스 아카데미 2차 프로젝트(2022.7.26 ~ 2022.8.28)  
 
 ## 게임 시연 영상
@@ -141,7 +141,16 @@
       *  **void OnAnimatorMove()** : Root Motion 관리  
       *  **void OnControllerColliderHit(ControllerColliderHit hit)** : 오브젝트가 CharacterController와 충돌시 밀리게 하기 위해 사용   
 
-
+* **Health.cs** : 플레이어와 좀비의 체력을 관리하는 기반 클래스  
+  * **개요** : 플레이어와 좀비가 체력관련 공통 속성과 메소드가 있기때문에 확장성을 고려하여 기반클래스-파생클래스 개념 적용  
+  *  **Main Function**  
+      *  **void TakeDamage(float amount, Vector3 direction)** : 데미지를 받는 메소드  
+      *  **void Die(Vector3 direction)** : 체력이 0일때 사망하는 기능  
+  *  **virtual Function**  
+      *  **void OnStart()** : 객체가 태어났을때 체력과 히트박스, SkinnedMeshRenderer 등 컴포넌트를 등록하는 가상 함수  
+      *  **void OnUpdate()** : (좀비 한정) 좀비가 데미지를 입을때 SkinnedMeshRenderer가 변하는데 시간에 따른 색조정이 필요하여 void Update()에 구현  
+      *  **void OnDamage(float amount, Vector3 direction)** : 데미지를 입었을때 체력이 감소하는것과 데미지를 입어 체력이 0이하가 되었을때 사망하는것은 공통으로 구현, 플레이어 체력바 업데이트 및 좀비 타격 이펙트는 따로 구현  
+      *  **void OnDeath(Vector3 direction)** : 플레이어와 좀비는 사망 메커니즘이 다르기 때문에 파생클래스에서 구현  
 * **ActiveWeapon.cs**  
   *  **Main Function**  : Update()에서 사용자의 입력 및 캐릭터 속성(레벨 등)에 따라 무기를 관리하는 함수  
       *  **void HandleFireWeapon()** : 무기 발사와 장전 제어      
@@ -168,9 +177,11 @@
           *  **void DetachMagazine()** : 탄창 분리 기능(원래 무기에 붙어있는 탄창을 비활성화 후 임시 탄창을 손 위치에 생성한다), 장전 소리 재생.    
           *  **void DropMagazine()** : 탄창 버리는 기능(손에 있는 탄창을 비활성화 후 떨어지는 탄창을 생성 후 떨어지게 한다(rigidbody 및 collider 추가))        
           *  **void RefillMagazine()** : 배낭에서 탄창을 꺼내는 기능(손에 있는 탄창을 활성화 한다.)   
-          *  **void AttachMagazine()** : 총기에 탄창을 붙이는 기능(손에 있는 탄창을 비활성화하고 원래 무기에 붙어있는 탄창을 활성화한다. 애니메이션 파라미터 초기화 후 UI를 업데이트 해준다.)
+          *  **void AttachMagazine()** : 총기에 탄창을 붙이는 기능(손에 있는 탄창을 비활성화하고 원래 무기에 붙어있는 탄창을 활성화한다. 애니메이션 파라미터 초기화 후 UI를 업데이트 해준다.)  
 
-* **RayCastWeapon1.cs**  
+
+**무기 스크립트**  
+* **RayCastWeapon1.cs**  : **무기 구현 스크립트**  
   * **Main Function**  : **ActiveWeapon.cs**의 Update()에서 호출하는 함수  
     * **void UpdateWeapon(float deltaTime, Vector3 target)** : 발사 기준 시간 업데이트  
       * **void UpdateFiring(float deltaTime, Vector3 target)** : 발사 기준시간과 연사율 비교하여 총알 발사  
@@ -184,6 +195,17 @@
     * **void StartFiring()** : (bool)isFiring = true, 발사 기준 시간 초기화, 반동 초기화  
     * **void StopFiring()** : (bool)isFiring = false  
 
+
+* **WeaponRecoil.cs** : **무기 반동 스크립트**,  관련 속성들은 **ActiveWeapon.cs**에서 무기 장착시 할당한다.   
+  * **Main Function**  : Update()에서 호출하는 함수  
+    * **HandleWeaponRecoil()** : 카메라 축과 반동 시간을 제어하는 함수  
+  * **Sub Function**  
+    * **void GenerateRecoil(string weaponName)** : 시네머신관련 컴포넌트 **CinemachineImpulseSource**에서 카메라 효과 생성 및 반동 값 적용, 반동 애니메이션 재생  
+    * **int NextIndex(int index)** : 다음 반동값 return함수  
+    * **Reset()** : 반동 초기화  
+
+* **Inspector**  
+  <img src="Image/GunInspector2.png" height="500px"></img>  
 ## 개선 사항
 
 
