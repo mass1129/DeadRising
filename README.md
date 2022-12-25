@@ -259,7 +259,7 @@
       *  **void Explode()** : Physics.OverlapSphere를 통해 폭발 범위내 좀비 GET 후 폭발 피해 및 이펙트, 사운드 생성  
       *  **void OnTriggerEnter(Collider other)** : 폭발탄환이 붙을 오브젝트 등록  
       *  **void OnDrawGizmosSelected()** : unity editor에서 폭발 범위를 조정하기 위해 사용  
-
+      <img src="Image/costomBullet.gif" style="width:400px"></img>  
 * **CarEnterExitSystem.cs** : 폭탄 석궁의 딜레이 폭발 탄환 구현 스크립트     
   *  **Function**  
       *  **IEnumerator StartDrive()** : 자동차 탑승 메소드  
@@ -268,11 +268,11 @@
           *  **void CarDrivingSFX(AudioClip clip)** : 엔진음  
           *  **void CarFiringSFX()** : 차량 화염방사기 사운드  
       *  **void OnTriggerEnter(Collider other), void OnTriggerExit(Collider other)** : 차량 탑승 가능 여부 판별  
-
+      <img src="Image/carEnterExit.gif" style="width:400px"></img>  
 * **ItemPickup.cs** : 충돌시 아이템 획득 스크립트   
 
 * **KeyItem.cs** : 미션 아이템 감지 범위 제어 스크립트  
-
+    <img src="Image/keyItem.gif" style="width:400px"></img>  
 * **SoundManager.cs** : 배경음 관리 스크립트  
   *  **Function**  
       *  **void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)** : 해당 메소드를 SceneManager.sceneLoaded의 Unity Action에 등록, 씬 전환시 자동으로 호출  
@@ -281,8 +281,12 @@
 
 ## 개선 사항  
 * 1차 프로젝트(RETAKE)에서 체력관련 클래스에 상속 클래스를 사용하지 않아서 발생한 문제를 이번 프로젝트에서는 개선  
-* 차량 탑승 전후로 rig 애니메이션이 변형이 발생 -> 차량 탑승시 Player.transform.SetParent(Car);으로 플레이어의 부모객체를 차량으로 만들고 비활성화하는데 이때 애니메이션이 초기화가 안되어서 애니메이션에 변형이 일어나는것으로 보임  
-* 일반석궁 장전중에 폭발 석궁으로 업그레이드가 발생시(아이템 획득 or 레벨업) 폭발 석궁 총알이 감소 -> 
+  
+* 차량 탑승 전후로 rig 애니메이션이 변형이 발생 -> 차량 탑승시 Player.transform.SetParent(Car);으로 1. 플레이어의 부모객체를 차량으로 만들고 2. 비활성화하는데 이때 애니메이션이 초기화가 안되어서 애니메이션에 변형이 일어나는것으로 보임  
+  
+* 일반석궁 장전중에 폭발 석궁으로 업그레이드가 발생시(아이템 획득 or 레벨업) 폭발 석궁 총알이 감소 -> 장전중이고 활성화중인 슬롯과 획득 무기의 슬롯이 같은경우 아이템 획득을 막는것으로 임시 해결,  레벨업시 무기 업그레이드인 경우 업데이트문에서 무기가 업그레이드 될때까지 계속 확인하기때문에 장전중이 아닐때 조건 추가로 임시 해결. 근본적인 해결은 코루틴으로 장전이 끝날때까지 기다렸다가 무기 업그레이드를 해야 할것으로 보임  
+  
+* 무기 스왑이 코루틴으로 이루어져 있고 장전같은 경우는 애니메이션에 의존적이라 행위가 캔슬이 안되는 등 자유도가 떨어짐.     
 
 
 ## License
