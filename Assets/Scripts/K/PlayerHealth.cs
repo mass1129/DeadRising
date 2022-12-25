@@ -5,11 +5,11 @@ using UnityEngine;
 public class PlayerHealth : Health
 {
     JH_Ragdoll ragdoll;
-    UIHealthBar healthBar;
+    PlayerUI healthBar;
     protected override void OnStart()
     {
         base.OnStart();
-        healthBar = GetComponentInChildren<UIHealthBar>();
+        healthBar = GetComponentInChildren<PlayerUI>();
         ragdoll = GetComponent<JH_Ragdoll>();
         healthBar.SetHealthBarPercentage(currentHealth / maxHealth);
 

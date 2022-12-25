@@ -13,8 +13,10 @@ public class ItemPickup : MonoBehaviour
         ActiveWeapon activeWeapon = other.gameObject.GetComponent<ActiveWeapon>();
         //해당 스크립트가 있을경우
         if(activeWeapon)
-        {   
-            //
+        {
+            var currentWeapon = activeWeapon.GetActiveWeapon();
+            if (currentWeapon.weaponSlot == weaponFab.weaponSlot && currentWeapon.type != weaponFab.type && activeWeapon.isReloading)
+                return;
             RayCastWeapon1 newWeapon = Instantiate(weaponFab);
             activeWeapon.Equip(newWeapon);
         }

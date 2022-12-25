@@ -14,7 +14,7 @@ public class JH_AttackFlame : MonoBehaviour
     int value;
 
     bool bigMode = false;
- 
+    CarEnterExitSystem carEnterExitSystem;
 
     // Start is called before the first frame update
     void Start()
@@ -22,7 +22,7 @@ public class JH_AttackFlame : MonoBehaviour
         main = flame.main;
         sub = dust.main;
         flameCollider.enabled = false;
-
+        carEnterExitSystem = GetComponent<CarEnterExitSystem>();
     }
 
     // Update is called once per frame
@@ -31,29 +31,36 @@ public class JH_AttackFlame : MonoBehaviour
         main.maxParticles = value;
         sub.maxParticles = value;
 
-        if(gameObject.transform.Find("Player")){
-            if(Input.GetButton("Fire1")){
-            if(value <= 1000){
-                value += 15;
+        if (carEnterExitSystem.driving)
+        {
+            if(Input.GetButton("Fire1"))
+            {
+                if(value <= 1000)
+                {
+                    value += 15;
+                }
+                flameCollider.enabled = true;
             }
-            flameCollider.enabled = true;
+
+            if(Input.GetButtonUp("Fire1"))
+            {
+
+                flameCollider.enabled = false;
+            }
+
+
+            if(Input.GetButtonDown("Fire2"))
+            {
+                swapMode();
+            }
+
+            
+
         }
-
-        if(Input.GetButtonUp("Fire1")){
-
-            flameCollider.enabled = false;
-        }
-
-
-        if(Input.GetButtonDown("Fire2")){
-            swapMode();
-        }
-
-        if(value >= 0){
+        if (value >= 0)
+        {
             value -= 10;
         }
-        }
-
 
     }
     

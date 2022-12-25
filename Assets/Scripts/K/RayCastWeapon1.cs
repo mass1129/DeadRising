@@ -7,7 +7,12 @@ public class RayCastWeapon1 : MonoBehaviour
 {
     class Bullet
     {
-        
+        public enum BulletType
+        {
+            General,
+            Explosion
+        }
+        public BulletType type = BulletType.General;
         public float time;
         public Vector3 initialPosition;
         public Vector3 initialVelocity;
@@ -16,6 +21,13 @@ public class RayCastWeapon1 : MonoBehaviour
         //public ParticleSystem projectileEffect;
 
     }
+    public enum WeaponType : int
+    {
+        Arrow,
+        ExplosionArrow,
+        MachineGun
+    }
+
     [Header("Bullet")]
     public float bulletSpeed = 1000.0f;
     public float bulletDrop = 0.0f;
@@ -36,6 +48,8 @@ public class RayCastWeapon1 : MonoBehaviour
     public WeaponRecoil recoil;
     [SerializeField] private LayerMask shootColliderLayerMask = new LayerMask();
     public bool uninfinitybullet;
+    public WeaponType type; 
+
 
     [Header("Effect")]
     public ParticleSystem[] muzzleFlash;
@@ -45,8 +59,7 @@ public class RayCastWeapon1 : MonoBehaviour
     public GameObject tracerSmoke;
 
     [Header("WeaponType")]
-    public bool primaryWeaponUpGrade1;
-    public bool isMusinGun;
+
     public string weaponName;
 
     [Header("SFX")]
@@ -99,7 +112,7 @@ public class RayCastWeapon1 : MonoBehaviour
         if (ammoCount <= 0) return;
 
         ammoCount--;
-        if (!isMusinGun) magazine.SetActive(false);
+        if (type != WeaponType.MachineGun) magazine.SetActive(false);
         //�ѱ� ����Ʈ ����.
         foreach (var particle in muzzleFlash)
         {
@@ -121,6 +134,10 @@ public class RayCastWeapon1 : MonoBehaviour
     {
         //�Ҹ��� �����Ѵ�.
         Bullet bullet = new Bullet();
+        if (type == WeaponType.ExplosionArrow)
+            bullet.type = Bullet.BulletType.Explosion;
+        else
+            bullet.type = Bullet.BulletType.General;
         //�߻���ġ ����
         bullet.initialPosition = position;
         //�߻�� �ʹ� �Ŀ�
@@ -133,7 +150,7 @@ public class RayCastWeapon1 : MonoBehaviour
         bullet.tracerSmoke.transform.forward = velocity;
         if (bullet.tracerSmoke != null)
             Destroy(bullet.tracerSmoke.gameObject, 2f);
-
+       
         //ó����ġ���� �̵��� ��Ŵ
         bullet.tracer.AddPosition(position);
 
@@ -141,7 +158,7 @@ public class RayCastWeapon1 : MonoBehaviour
         return bullet;
     }
 
-
+    public bool canDestoryWeapon = false;
 
     //update�� �ش� �޼ҵ� ���� -> �Ѿ��� ��� ������Ʈ ���ٰ���.
     public void UpdateBullets(float deltaTime)
@@ -153,6 +170,10 @@ public class RayCastWeapon1 : MonoBehaviour
     {
         //�Ҹ�����(�Ҹ�time�� maxtime�� �Ѿ��)
         bullets.RemoveAll(bullet => bullet.time >= maxLifeTime);
+        if (bullets.Count <= 0)
+            canDestoryWeapon = true;
+        else
+            canDestoryWeapon = false;
     }
 
     void SimulateBullet(float deltaTime)
@@ -201,13 +222,13 @@ public class RayCastWeapon1 : MonoBehaviour
             bullet.time = maxLifeTime;
             end = hitinfo.point;
 
-            if (primaryWeaponUpGrade1) Instantiate(explosionArrow, hitinfo.point, Quaternion.identity);
+            if (bullet.type == Bullet.BulletType.Explosion) Instantiate(explosionArrow, hitinfo.point, Quaternion.identity);
 
             var rb2d = hitinfo.collider.GetComponent<Rigidbody>();
             if (rb2d)
             {
                 
-                    if(!primaryWeaponUpGrade1)
+                    if(type != WeaponType.ExplosionArrow)
                     rb2d.AddForceAtPosition(ray.direction * 20, hitinfo.point, ForceMode.Impulse);
                 
             }
@@ -221,10 +242,10 @@ public class RayCastWeapon1 : MonoBehaviour
             var headBox = hitinfo.collider.GetComponent<JH_isHeadHit>();
             if (headBox)
             {   
-                if(!primaryWeaponUpGrade1)
+                if(type != WeaponType.ExplosionArrow)
                 headBox.OnRaycastHeadHit(ray.direction);
             }
-            if (bullet.tracerSmoke != null && !primaryWeaponUpGrade1)
+            if (bullet.tracerSmoke != null && !(type != WeaponType.ExplosionArrow))
                 Destroy(bullet.tracerSmoke.gameObject);
         }
 
@@ -281,6 +302,7 @@ public class RayCastWeapon1 : MonoBehaviour
     public void RefillAmmo()
     {
         ammoCount = clipSize;
+        if(uninfinitybullet)
         clipCount--;
     }
 

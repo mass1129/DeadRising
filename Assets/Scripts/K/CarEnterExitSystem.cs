@@ -23,9 +23,10 @@ public class CarEnterExitSystem : MonoBehaviour
     bool candrive;
     public bool driving;
     ActiveWeapon activeWeapon;
-    int activeIndex;
-    int holsterIndex;
+    bool firing;
 
+    public float drivingVolume = 0.1f;
+    public float fireVolume = 0.5f;
     private void Awake()
     {
        
@@ -38,49 +39,37 @@ public class CarEnterExitSystem : MonoBehaviour
         audioListener.SetActive(false);
         carcontroller.enabled = false;
         carCam.enabled = false;
-        
     }
 
-   
     void Update()
     {
        
         if(Input.GetKeyDown(KeyCode.E)&& candrive&& !driving)
         {
-            activeWeapon = Player.gameObject.GetComponent<ActiveWeapon>();
+            
             StartCoroutine(StartDrive());
             
         }
 
         else if(Input.GetKeyDown (KeyCode.E) && driving)
         {
-            audioSource[0].Stop();
-            candrive = false;
-            
-            carCam.enabled = false;
-           
-            carcontroller.enabled = false;
-            
-
-            Player.transform.SetParent(null);
-           
-            Player.gameObject.SetActive(true);
-            detact.SetActive(false);
-            driving = false;
-           
-            audioListener.SetActive(false);
-
+            ExitCar();
 
         }
 
         if (driving)
-            CarFiringSFX();
+        {
+
+            CarSFX();
+        }
+           
 
 
     }
 
     IEnumerator StartDrive()
     {
+        activeWeapon = Player.gameObject.GetComponent<ActiveWeapon>();
         yield return StartCoroutine(activeWeapon.ToggleActiveWeapon());
         audioListener.SetActive(true);
         carCam.enabled = true;
@@ -91,19 +80,33 @@ public class CarEnterExitSystem : MonoBehaviour
 
         Player.gameObject.SetActive(false);
         audioListener.SetActive(true);
-        OnCarSFX();
-        CarDrivingSFX(driveAudioClip[1]);
+        audioSource[0].PlayOneShot(driveAudioClip[0]);
 
         detact.SetActive(true);
 
         driving = true;    
     }
-    private void OnCarSFX()
-    {
 
-        audioSource[0].PlayOneShot(driveAudioClip[0]);
-        
+    void ExitCar()
+    {
+        audioSource[0].Stop();
+        candrive = false;
+
+        carCam.enabled = false;
+
+        carcontroller.enabled = false;
+
+        Player.transform.SetParent(null);
+
+        Player.gameObject.SetActive(true);
+        detact.SetActive(false);
+        driving = false;
+
+        audioListener.SetActive(false);
     }
+
+
+    
     private void CarDrivingSFX(AudioClip clip)
     {
 
@@ -120,8 +123,8 @@ public class CarEnterExitSystem : MonoBehaviour
         audioSource[1].clip = driveAudioClip[2];
         audioSource[1].loop = true;
         audioSource[1].volume = fireVolume;
-       
-        
+
+
         bool isTryFire = Input.GetButtonDown("Fire1");
         bool stopFire = Input.GetButtonUp("Fire1");
 
@@ -135,28 +138,22 @@ public class CarEnterExitSystem : MonoBehaviour
 
         if (stopFire)
         {
-            print("11111");
             audioSource[1].Stop();
 
         }
 
 
     }
-    bool firing;
-    void HandleFireSFX()
+    private void CarSFX()
     {
-        
-
+        CarDrivingSFX(driveAudioClip[1]);
+        CarFiringSFX();
     }
-    public float drivingVolume = 0.1f;
-    public float fireVolume = 0.5f;
+
     private void OnTriggerEnter(Collider other)
     {
         if(other.gameObject.name == "Player" )
         {
-            
-
-
 
             candrive = true;
 

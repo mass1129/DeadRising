@@ -13,13 +13,21 @@ public class PlayerUI : MonoBehaviour
     public Image[] outLineImg;
     public GameObject arrow2Slot;
 
-   
+    [Header("Health")]
+    public GameObject healthUI;
+    float parentWidth;
+    public Image healthForeground;
+    public Image healthBackground;
+    public TMP_Text healthText;
+
 
     private void Start()
     {
+        parentWidth = healthUI.GetComponent<RectTransform>().rect.width;
         DeactiveSlotUI();
         arrow2Slot.SetActive(false);
     }
+
     public void Refresh(int ammoCount, int clipCount, int activeWeaponIndex, bool uninfinitybullet)
     {
         if (!uninfinitybullet) return;
@@ -51,5 +59,10 @@ public class PlayerUI : MonoBehaviour
         }
 
     }
-
+    public void SetHealthBarPercentage(float percentage)
+    {
+        float width = parentWidth * percentage;
+        healthForeground.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+        healthText.text = (percentage * 100).ToString();
+    }
 }

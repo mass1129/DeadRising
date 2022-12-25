@@ -1,7 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
+using TMPro;
 using UnityEngine.SceneManagement;
 
 
@@ -9,15 +10,28 @@ public class PlayerEXP : MonoBehaviour
 {
     public static PlayerEXP instance;
 
-    UIEXPBar expBar;
-
     int _killNum = 0;
     int _levelNum = 1;
     int _killPerLevel = 0;
+    public int multipleLevel = 2;
+
+    public bool upgradeWeapon;
+
+    public GameObject expUI;
+    float parentWidth;
+    public TMP_Text killNumText;
+    public TMP_Text levelNumText;
+
+    public Image expForeground;
+    public Image expBackground;
 
 
     private void Awake()
     {
+        parentWidth = expUI.GetComponent<RectTransform>().rect.width;
+        SetEXPBarPercentage(KillPerLevel / (Level * multipleLevel));
+        KillPerLevel = 0;
+        upgradeWeapon = false;
         if (instance == null)
         {
             instance = this;
@@ -29,10 +43,20 @@ public class PlayerEXP : MonoBehaviour
             Destroy(gameObject);
         }
 
-        
-
-
     }
+    void Update()
+    {
+        if (SceneManager.GetActiveScene().buildIndex == 7)
+        {
+            gameObject.SetActive(false);
+        }
+        if (SceneManager.GetActiveScene().buildIndex != 7)
+        {
+
+            gameObject.SetActive(true);
+        }
+    }
+
 
     public int KillNum
     {
@@ -57,16 +81,16 @@ public class PlayerEXP : MonoBehaviour
         set
         {
             _killPerLevel = value;
-            if(_killPerLevel>=(Level*2))
+            if(_killPerLevel>=(Level* multipleLevel))
             {
                 Level++;
                 _killPerLevel = 0;
                 upgradeWeapon = true;
 
             }
-            float percent = (float)KillPerLevel / ((float)Level * 5);
+            float percent = (float)KillPerLevel / ((float)Level * multipleLevel);
             
-            expBar.SetEXPBarPercentage(percent);
+            SetEXPBarPercentage(percent);
            
         }
     }
@@ -82,30 +106,15 @@ public class PlayerEXP : MonoBehaviour
         }
     }
 
-    public bool upgradeWeapon;
+   
    
 
-
-    void Start()
+    public void SetEXPBarPercentage(float percentage)
     {
-        expBar = GetComponentInChildren<UIEXPBar>();
-        expBar.SetEXPBarPercentage(KillPerLevel / (Level * 5));
-        KillPerLevel = 0;
-        upgradeWeapon = false;
+        float width = parentWidth * percentage;
+        expForeground.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+        killNumText.text = KillNum.ToString();
+        levelNumText.text = Level.ToString();
 
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (SceneManager.GetActiveScene().buildIndex == 7)
-        {
-            gameObject.SetActive(false);
-        }
-        if (SceneManager.GetActiveScene().buildIndex != 7)
-        {
-
-            gameObject.SetActive(true);
-        }
     }
 }

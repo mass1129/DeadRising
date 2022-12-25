@@ -107,11 +107,11 @@ public class ActiveWeapon : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             var weapon1 = GetWeaPon(0);
-            if (weapon1 != null)
+            if (weapon1 != null&& activeWeaponIndex!=0)
                 SetActiveWeapon(WeaponSlot.Primary);
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha2))
+        if (Input.GetKeyDown(KeyCode.Alpha2) && activeWeaponIndex != 1)
         {
             var weapon2 = GetWeaPon(1);
             if (weapon2 != null)
@@ -127,11 +127,12 @@ public class ActiveWeapon : MonoBehaviour
         var weapon = GetWeaPon(0);
         if(weapon!=null)
         {
-            if (weapon.primaryWeaponUpGrade1)
+            if ((int)weapon.type ==1)
             {
                 ammoWidget.arrow2Slot.SetActive(true);
-                if (weapon.clipCount <= 0&&weapon.ammoCount<=0)
+                if (weapon.clipCount <= 0&&weapon.ammoCount<=0&&weapon.canDestoryWeapon&& !isReloading)
                 {
+                    
                     ammoWidget.arrow2Slot.SetActive(false);
                     EquipFirstWeapon();
                 }
@@ -161,7 +162,7 @@ public class ActiveWeapon : MonoBehaviour
 
             if (PlayerEXP.instance.Level != 1 && PlayerEXP.instance.Level % 2 == 1)
             {
-                if (!GetWeaPon(0).primaryWeaponUpGrade1)
+                if ((int)GetWeaPon(0).type != 1)
                 {
                     RayCastWeapon1 newWeapon = Instantiate(UpgradePrimaryweaponFab);
                     Equip(newWeapon, false);
@@ -219,8 +220,12 @@ public class ActiveWeapon : MonoBehaviour
         var weapon = GetWeaPon(weaponSlotIndex);
         //무기가 이미 해당 배열에 있을 경우
         if (weapon)
-        {
-            //해당 무기를 삭제한다.
+        {   
+            if(weapon.type == newWeapon.type )
+            {
+                RefillAmmo(weapon, newWeapon.clipCount);
+                return;
+            }
             Destroy(weapon.gameObject);
         }
         weapon = newWeapon;
@@ -237,24 +242,33 @@ public class ActiveWeapon : MonoBehaviour
 
     public IEnumerator ToggleActiveWeapon()
     {   
-        ammoWidget.DeactiveSlotUI();
-        yield return StartCoroutine(HolsterWeapon(activeWeaponIndex));
-        activeWeaponIndex = -1;
-        canDrive = true;
+        if(activeWeaponIndex != -1)
+        {
+            ammoWidget.DeactiveSlotUI();
+            yield return StartCoroutine(HolsterWeapon(activeWeaponIndex));
+            activeWeaponIndex = -1;
+            canDrive = true;
+        }
+        
     }
-    
+
 
 
     void SetActiveWeapon(WeaponSlot weaponSlot)
     {
         int holsterIndex = activeWeaponIndex;
         int activateIndex = (int)weaponSlot;
-        
-        if (holsterIndex == activateIndex || isChangingWeapon)
+
+        if (isChangingWeapon)
         {
             return;
-            
+
         }
+        if (holsterIndex == activateIndex)
+        {
+            StartCoroutine(SwitchWeapon(holsterIndex, holsterIndex));
+        }
+
         StartCoroutine(SwitchWeapon(holsterIndex, activateIndex));
        
     }
@@ -274,10 +288,9 @@ public class ActiveWeapon : MonoBehaviour
         var weapon = GetWeaPon(index);
         if (weapon)
         {
-
             rigController.SetBool("holster_weapon", true);
             do
-            {
+            {   
                 yield return new WaitForSeconds(0.05f);
             } while (rigController.GetCurrentAnimatorStateInfo(0).normalizedTime < 1.0f);
             
@@ -322,7 +335,7 @@ public class ActiveWeapon : MonoBehaviour
         if (weapon)
         {
             weapon.clipCount += clipCount;
-            ammoWidget.Refresh(weapon.ammoCount, weapon.clipCount, activeWeaponIndex, weapon.uninfinitybullet);
+            ammoWidget.Refresh(weapon.ammoCount, weapon.clipCount, (int)weapon.weaponSlot, weapon.uninfinitybullet);
         }
     }
 

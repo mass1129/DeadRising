@@ -35,11 +35,11 @@ public class ReloadWeapon : MonoBehaviour
         }
 
     }
-
+    RayCastWeapon1 weapon;
     private void DetachMagazine()
     {
-        RayCastWeapon1 weapon = activeWeapon.GetActiveWeapon();
-        if (weapon.isMusinGun)
+        weapon = activeWeapon.GetActiveWeapon();
+        if ((int)weapon.type == 2)
             magazineHand = Instantiate(weapon.magazine, leftHand, true);
         else magazineHand = Instantiate(weapon.magazine, leftHand, true);
         weapon.magazine.SetActive(false);
@@ -63,7 +63,7 @@ public class ReloadWeapon : MonoBehaviour
 
     private void AttachMagazine()
     {
-        RayCastWeapon1 weapon = activeWeapon.GetActiveWeapon();
+       
         weapon.magazine.SetActive(true);
         Destroy(magazineHand);
         weapon.RefillAmmo();
