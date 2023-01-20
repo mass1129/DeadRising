@@ -260,7 +260,7 @@
       *  **void OnTriggerEnter(Collider other)** : 폭발탄환이 붙을 오브젝트 등록  
       *  **void OnDrawGizmosSelected()** : unity editor에서 폭발 범위를 조정하기 위해 사용  
       <img src="Image/costomBullet.gif" style="width:400px"></img>  
-* **CarEnterExitSystem.cs** : 폭탄 석궁의 딜레이 폭발 탄환 구현 스크립트     
+* **CarEnterExitSystem.cs** : 차량 탑승 구현 스크립트   
   *  **Function**  
       *  **IEnumerator StartDrive()** : 자동차 탑승 메소드  
       *  **void ExitCar()** : 자동차 하차 메소드  
